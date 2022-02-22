@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>Yunit</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<RootNamespace>Yunit</RootNamespace>
+		<Version>1.1.0</Version>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\yunit\yunit.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\yunit\yunit.csproj" />
+	</ItemGroup>
 
 </Project>
