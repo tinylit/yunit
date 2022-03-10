@@ -47,6 +47,15 @@ namespace Yunit.Sdk
 
             if (startupAttribute is null)
             {
+                try
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(runtimeType.TypeHandle);
+                }
+                catch (Exception e)
+                {
+                    Aggregator.Add(new TypeInitializationException(runtimeType.FullName, e));
+                }
+
                 return await base.RunTestClassAsync(testClass, @class, testCases);
             }
 
@@ -64,11 +73,13 @@ namespace Yunit.Sdk
 
         protected virtual async Task<RunSummary> RunTestClassCoreAsync(ITestClass testClass, IReflectionTypeInfo @class, IEnumerable<IXunitTestCase> testCases, StartupAttribute startupAttribute)
         {
+            var runtimeType = testClass.Class.ToRuntimeType();
+
             var startupAttributeType = startupAttribute.GetType();
 
             var startupDriverAttribute = startupAttributeType.GetCustomAttribute<StartupDriverAttribute>();
 
-            IStartupDriver startupDriver = (IStartupDriver)ActivatorUtilities.CreateInstance(new ServiceProvider(testClass.Class.ToRuntimeType()), startupDriverAttribute.StartupDriverType);
+            IStartupDriver startupDriver = (IStartupDriver)ActivatorUtilities.CreateInstance(new ServiceProvider(runtimeType), startupDriverAttribute.StartupDriverType);
 
             using (var driver = startupDriver.StartHost(startupAttribute))
             {
@@ -78,6 +89,15 @@ namespace Yunit.Sdk
 
                         await host.StartAsync()
                             .ConfigureAwait(false);
+
+                        try
+                        {
+                            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(runtimeType.TypeHandle);
+                        }
+                        catch (Exception e)
+                        {
+                            Aggregator.Add(new TypeInitializationException(runtimeType.FullName, e));
+                        }
 
                         try
                         {
@@ -93,6 +113,15 @@ namespace Yunit.Sdk
 
                         await webHost.StartAsync()
                             .ConfigureAwait(false);
+
+                        try
+                        {
+                            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(runtimeType.TypeHandle);
+                        }
+                        catch (Exception e)
+                        {
+                            Aggregator.Add(new TypeInitializationException(runtimeType.FullName, e));
+                        }
 
                         try
                         {

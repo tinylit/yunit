@@ -2,7 +2,7 @@
   <ItemGroup>
     <AssemblyAttribute Include="Xunit.TestFramework">
       <_Parameter1>Yunit.Sdk.YunitTestFramework</_Parameter1>
-      <_Parameter2>Yunit</_Parameter2>
+      <_Parameter2>Yunit.v1</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5017578-15A5-4A54-8D55-7F70582BF544}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yunit", "src\yunit\yunit.csproj", "{57D1A780-CB5F-4B1C-98DF-E370CE112D81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yunit.v1", "src\yunit\yunit.v1.csproj", "{57D1A780-CB5F-4B1C-98DF-E370CE112D81}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{53D05C88-C483-4CA1-8144-F6D6990F7B52}"
 EndProject
@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yunit.api.tests", "tests\yu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yunit.v2.tests", "tests\yunit.v2.tests\yunit.v2.tests.csproj", "{051D96E4-5088-4BF8-AEA5-EF5D1CA19797}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "yunit.v3", "src\yunit.v3\yunit.v3.csproj", "{5A76AF24-0D4E-4AC0-9781-CEDD1DDE9381}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "yunit.v3", "src\yunit.v3\yunit.v3.csproj", "{5A76AF24-0D4E-4AC0-9781-CEDD1DDE9381}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

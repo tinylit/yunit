@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\yunit\yunit.csproj" />
+		<ProjectReference Include="..\..\src\yunit\yunit.v1.csproj" />
 	</ItemGroup>
 
 	<Import Project="yunit.targets" />

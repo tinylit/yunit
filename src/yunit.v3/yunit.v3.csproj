@@ -3,11 +3,14 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<RootNamespace>Yunit</RootNamespace>
-		<Version>1.1.0</Version>
+		<Version>1.2.0.5</Version>		
+		<Authors>影子和树</Authors>
+		<Company>好医生集团</Company>
+		<Description>支持使用【WebApi】的启动类自动注入构造函数参数（测试类标记：[HostStartup(typeof(Startup)]）。</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\yunit\yunit.csproj" />
+		<ProjectReference Include="..\yunit\yunit.v1.csproj" />
 	</ItemGroup>
 
 </Project>
