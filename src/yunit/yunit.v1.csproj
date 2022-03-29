@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
 		<RootNamespace>Yunit</RootNamespace>
-		<Version>1.2.0.5</Version>
+		<Version>1.2.1.1</Version>
 		<Authors>影子和树</Authors>
 		<Company>好医生集团</Company>
 		<Description>如果有静态构造函数，为实例化类准备工作，支持自动注入构造函数参数（测试类标记：[Startup]）。</Description>
