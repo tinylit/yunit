@@ -7,13 +7,13 @@ namespace yunit.v2.tests
     {
     }
 
-    public interface IDependency<T>
+    public interface IDependency<T> where T : new()
     {
     }
 
     public class DependencyTests : IDependency { }
 
-    public class DependencyTests<T> : IDependency<T> { }
+    public class DependencyTests<T> : IDependency<T> where T : struct { }
 
     public class DependencyModel
     {

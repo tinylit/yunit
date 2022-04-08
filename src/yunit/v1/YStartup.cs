@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Yunit.Sdk
@@ -215,6 +216,8 @@ namespace Yunit.Sdk
                         return false;
                     }
 
+                    var typeArguments = typeDefinition.GetGenericArguments();
+
                     foreach (var y in assemblyTypes)
                     {
                         if (y.IsInterface || y.IsAbstract)
@@ -227,32 +230,206 @@ namespace Yunit.Sdk
                             continue;
                         }
 
-                        foreach (var z in y.GetInterfaces())
-                        {
-                            if (z.IsGenericType && z.GetGenericTypeDefinition() == typeDefinition)
-                            {
-                                switch (lifetime)
-                                {
-                                    case ServiceLifetime.Singleton:
-                                        services.AddSingleton(typeDefinition, y.GetGenericTypeDefinition());
-                                        break;
-                                    case ServiceLifetime.Scoped:
-                                        services.AddScoped(typeDefinition, y.GetGenericTypeDefinition());
-                                        break;
-                                    case ServiceLifetime.Transient:
-                                    default:
-                                        services.AddTransient(typeDefinition, y.GetGenericTypeDefinition());
-                                        break;
-                                }
+                        Type[] implementationTypeArguments = y.GetGenericArguments();
 
-                                return true;
-                            }
+                        if (typeArguments.Length != implementationTypeArguments.Length)
+                        {
+                            continue;
                         }
+
+                        if (!IsLike(serviceType, y))
+                        {
+                            continue;
+                        }
+
+                        if (!IsLikeGenericArguments(typeArguments, implementationTypeArguments))
+                        {
+                            continue;
+                        }
+
+                        switch (lifetime)
+                        {
+                            case ServiceLifetime.Singleton:
+                                services.AddSingleton(typeDefinition, y.GetGenericTypeDefinition());
+                                break;
+                            case ServiceLifetime.Scoped:
+                                services.AddScoped(typeDefinition, y.GetGenericTypeDefinition());
+                                break;
+                            case ServiceLifetime.Transient:
+                            default:
+                                services.AddTransient(typeDefinition, y.GetGenericTypeDefinition());
+                                break;
+                        }
+
+                        return true;
                     }
                 }
             }
 
             return flag;
+        }
+
+        private static bool IsLikeGenericArguments(Type[] typeArguments, Type[] implementationTypeArguments)
+        {
+            if (typeArguments.Length != implementationTypeArguments.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < typeArguments.Length; i++)
+            {
+                if (!IsLikeGenericArgument(typeArguments[i], implementationTypeArguments[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsLikeGenericArgument(Type typeArgument, Type implementationTypeArgument)
+        {
+            if ((typeArgument.GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) == GenericParameterAttributes.DefaultConstructorConstraint)
+            {
+                if ((implementationTypeArgument.GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) != GenericParameterAttributes.DefaultConstructorConstraint
+                    && (implementationTypeArgument.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != GenericParameterAttributes.NotNullableValueTypeConstraint)
+                {
+                    return false;
+                }
+            }
+
+            if ((typeArgument.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == (implementationTypeArgument.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint))
+            {
+                return false;
+            }
+
+            if ((typeArgument.GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) == GenericParameterAttributes.ReferenceTypeConstraint)
+            {
+                if ((implementationTypeArgument.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == GenericParameterAttributes.NotNullableValueTypeConstraint)
+                {
+                    return false;
+                }
+            }
+
+            return IsLike(typeArgument, implementationTypeArgument);
+        }
+
+        private static bool IsLike(Type type, Type implementationType)
+        {
+            if (type.IsGenericParameter || implementationType.IsGenericParameter)
+            {
+                if (type.IsGenericParameter && implementationType.IsGenericParameter)
+                {
+                    if (IsAssignableFrom(type.BaseType, implementationType.BaseType))
+                    {
+                        goto label_interface;
+                    }
+                }
+
+                return false;
+            }
+
+            if (!type.IsGenericType && !implementationType.IsGenericType)
+            {
+                return type.IsAssignableFrom(implementationType);
+            }
+
+            if (type.IsClass)
+            {
+                return IsAssignableFrom(type, implementationType);
+            }
+
+label_interface:
+
+            if (type.IsInterface)
+            {
+                return IsLikeInterfaces(type, implementationType.GetInterfaces());
+            }
+
+            Type[] interfaceTypes = type.GetInterfaces();
+
+            if (interfaceTypes.Length == 0)
+            {
+                return true;
+            }
+
+            Type[] implementationTypes = implementationType.GetInterfaces();
+
+            if (interfaceTypes.Length > implementationTypes.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < interfaceTypes.Length; i++)
+            {
+                if (IsLikeInterfaces(interfaceTypes[i], implementationTypes))
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsAssignableFrom(Type type, Type implementationType)
+        {
+            if (type is null || type == typeof(object))
+            {
+                return true;
+            }
+
+            if (type.IsGenericType)
+            {
+                var typeDefinition = type.GetGenericTypeDefinition();
+
+                do
+                {
+                    if (implementationType.IsGenericType && implementationType.GetGenericTypeDefinition() == typeDefinition)
+                    {
+                        return true;
+                    }
+
+                    implementationType = implementationType.BaseType;
+
+                } while (implementationType != null);
+            }
+            else
+            {
+                do
+                {
+                    if (type == implementationType)
+                    {
+                        return true;
+                    }
+
+                    implementationType = implementationType.BaseType;
+
+                } while (implementationType != null);
+            }
+
+            return false;
+        }
+
+        private static bool IsLikeInterfaces(Type interfaceType, Type[] implementationTypes)
+        {
+            if (!interfaceType.IsGenericType)
+            {
+                return implementationTypes.Contains(interfaceType);
+            }
+
+            var typeDefinition = interfaceType.GetGenericTypeDefinition();
+
+            foreach (var type in implementationTypes)
+            {
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeDefinition)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
